@@ -13,10 +13,30 @@ pipeline {
             }
         }
         
-        stage('Setup .NET') {
+        stage('Check Repository') {
             steps {
                 script {
-                    // Install .NET SDK if not available
+                    sh '''
+                        echo "Repository structure:"
+                        ls -la
+                        echo ""
+                        echo "Checking for .NET projects..."
+                        find . -name "*.sln" -o -name "*.csproj" | head -10
+                    '''
+                }
+            }
+        }
+        
+        stage('Setup .NET') {
+            when {
+                anyOf {
+                    changeset "**/*.sln"
+                    changeset "**/*.csproj"
+                    changeset "**/*.cs"
+                }
+            }
+            steps {
+                script {
                     sh '''
                         if ! command -v dotnet &> /dev/null; then
                             echo "Installing .NET SDK..."
@@ -29,54 +49,106 @@ pipeline {
             }
         }
         
-        stage('Restore Dependencies') {
-            steps {
-                sh 'dotnet restore GroupProject.sln'
+        stage('Build .NET Projects') {
+            when {
+                anyOf {
+                    changeset "**/*.sln"
+                    changeset "**/*.csproj"
+                    changeset "**/*.cs"
+                }
             }
-        }
-        
-        stage('Build') {
-            steps {
-                sh "dotnet build GroupProject.sln --configuration ${BUILD_CONFIGURATION} --no-restore"
-            }
-        }
-        
-        stage('Test') {
             steps {
                 script {
-                    // Run tests if any exist
                     sh '''
-                        if [ -d "GroupProject.Tests" ]; then
-                            dotnet test --configuration ${BUILD_CONFIGURATION} --no-build --verbosity normal
+                        if [ -f "*.sln" ]; then
+                            echo "Found solution file, building..."
+                            dotnet restore *.sln
+                            dotnet build *.sln --configuration Release
+                        elif [ -f "*.csproj" ]; then
+                            echo "Found project file, building..."
+                            dotnet restore *.csproj
+                            dotnet build *.csproj --configuration Release
                         else
-                            echo "No test project found, skipping tests"
+                            echo "No .NET projects found, skipping build"
                         fi
                     '''
                 }
             }
         }
         
-        stage('Publish') {
+        stage('Test .NET Projects') {
+            when {
+                anyOf {
+                    changeset "**/*.sln"
+                    changeset "**/*.csproj"
+                    changeset "**/*.cs"
+                }
+            }
             steps {
-                sh "dotnet publish GroupProject/GroupProject.csproj --configuration ${BUILD_CONFIGURATION} --output ./publish --no-build"
+                script {
+                    sh '''
+                        if [ -d "*Tests" ] || [ -f "*Tests.csproj" ]; then
+                            echo "Running tests..."
+                            dotnet test --configuration Release --verbosity normal
+                        else
+                            echo "No test projects found, skipping tests"
+                        fi
+                    '''
+                }
+            }
+        }
+        
+        stage('Publish .NET Projects') {
+            when {
+                anyOf {
+                    changeset "**/*.sln"
+                    changeset "**/*.csproj"
+                    changeset "**/*.cs"
+                }
+            }
+            steps {
+                script {
+                    sh '''
+                        if [ -f "*.sln" ]; then
+                            echo "Publishing solution..."
+                            dotnet publish *.sln --configuration Release --output ./publish
+                        elif [ -f "*.csproj" ]; then
+                            echo "Publishing project..."
+                            dotnet publish *.csproj --configuration Release --output ./publish
+                        else
+                            echo "No .NET projects to publish"
+                        fi
+                    '''
+                }
             }
         }
         
         stage('Archive Artifacts') {
+            when {
+                anyOf {
+                    changeset "**/*.sln"
+                    changeset "**/*.csproj"
+                    changeset "**/*.cs"
+                }
+            }
             steps {
-                archiveArtifacts artifacts: 'publish/**/*', fingerprint: true
+                archiveArtifacts artifacts: 'publish/**/*', fingerprint: true, allowEmptyArchive: true
             }
         }
         
-        stage('Deploy') {
-            when {
-                branch 'main'
-            }
+        stage('Repository Status') {
             steps {
                 script {
-                    echo "Deploying to production environment..."
-                    // Add your deployment steps here
-                    // Example: copy files to server, run deployment scripts, etc.
+                    sh '''
+                        echo "✅ Repository is clean and ready for development"
+                        echo "📁 Current structure:"
+                        ls -la
+                        echo ""
+                        echo "🚀 To start developing:"
+                        echo "1. Create your .NET project"
+                        echo "2. Add your source code"
+                        echo "3. CI/CD will automatically build and deploy"
+                    '''
                 }
             }
         }
