@@ -1,0 +1,33 @@
+name: Jenkins Integration
+
+on:
+  workflow_dispatch:
+    inputs:
+      jenkins_url:
+        description: 'Jenkins Server URL'
+        required: true
+        default: 'http://localhost:8080'
+      job_name:
+        description: 'Jenkins Job Name'
+        required: true
+        default: 'Group-Project-Pipeline'
+
+jobs:
+  trigger-jenkins:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Trigger Jenkins Build
+      uses: appleboy/jenkins-action@master
+      with:
+        url: ${{ github.event.inputs.jenkins_url }}
+        user: ${{ secrets.JENKINS_USER }}
+        password: ${{ secrets.JENKINS_TOKEN }}
+        job: ${{ github.event.inputs.job_name }}
+        parameters: |
+          BRANCH_NAME=${{ github.ref_name }}
+          COMMIT_SHA=${{ github.sha }}
+          BUILD_NUMBER=${{ github.run_number }}
