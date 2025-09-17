@@ -1,4 +1,4 @@
-name: Jenkins Integration
+name: FoodBook Jenkins Integration
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
       job_name:
         description: 'Jenkins Job Name'
         required: true
-        default: 'Group-Project-Pipeline'
+        default: 'FoodBook-Pipeline'
 
 jobs:
   trigger-jenkins:

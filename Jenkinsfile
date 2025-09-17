@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOTNET_VERSION = '8.0'
         BUILD_CONFIGURATION = 'Release'
+        PROJECT_NAME = 'FoodBook_PRN212_Group4_Fa25'
     }
     
     stages {
@@ -17,6 +18,7 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        echo "FoodBook Project - PRN212 Group4 Fa25"
                         echo "Repository structure:"
                         ls -la
                         echo ""
@@ -140,13 +142,13 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        echo "✅ Repository is clean and ready for development"
+                        echo "✅ FoodBook Project is clean and ready for development"
                         echo "📁 Current structure:"
                         ls -la
                         echo ""
-                        echo "🚀 To start developing:"
+                        echo "🚀 To start developing FoodBook:"
                         echo "1. Create your .NET project"
-                        echo "2. Add your source code"
+                        echo "2. Add your FoodBook source code"
                         echo "3. CI/CD will automatically build and deploy"
                     '''
                 }

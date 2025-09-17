@@ -1,7 +1,7 @@
-# Group Project - PRN212_4 - Fa25
+# FoodBook - PRN212 Group4 Fa25
 
 ## Mô tả dự án
-Dự án C# với CI/CD pipeline được cấu hình sẵn.
+Dự án FoodBook C# với CI/CD pipeline được cấu hình sẵn.
 
 ## CI/CD Pipeline
 - **GitHub Actions**: Tự động build, test và deploy
@@ -22,5 +22,5 @@ Dự án C# với CI/CD pipeline được cấu hình sẵn.
 3. CI/CD sẽ tự động hoạt động
 
 ## Repository
-- **GitHub**: https://github.com/TomOutfit/Group-Project---PRN212_4---Fa25
+- **GitHub**: https://github.com/TomOutfit/FoodBook_PRN212_Group4_Fa25
 - **Jenkins**: http://localhost:8080 (khi chạy local)
